@@ -34,7 +34,11 @@ describe("UsersController", () => {
   });
 
   describe(".createUser", () => {
-    const createUserDto: CreateUserDto = { email: "user@test.com", password: "password" };
+    const createUserDto: CreateUserDto = {
+      email: "user@test.com",
+      password: "password",
+      address: "address"
+    };
 
     it("should create new user", async () => {
       const createdUser = await usersService.createUser(createUserDto);
@@ -56,7 +60,11 @@ describe("UsersController", () => {
   });
 
   describe(".findOneBy", () => {
-    const createUserDto: CreateUserDto = { email: "user@test.com", password: "password" };
+    const createUserDto: CreateUserDto = { 
+      email: "user@test.com",
+      password: "password",
+      address: "address"
+    };
 
     it("should get user by provided param", async () => {
       const user = await usersService.createUser(createUserDto);

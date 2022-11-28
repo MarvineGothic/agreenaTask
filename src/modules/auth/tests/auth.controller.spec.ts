@@ -40,9 +40,13 @@ describe("AuthController", () => {
   describe("POST /auth", () => {
     const createUser = async (userDto: CreateUserDto) => usersService.createUser(userDto);
     const loginDto: LoginUserDto = { email: "user@test.com", password: "password" };
+    const userDto: CreateUserDto = {
+      ...loginDto,
+      address: "address",
+    }
 
     it("should login existing user", async () => {
-      await createUser(loginDto);
+      await createUser(userDto);
 
       const res = await agent.post("/api/auth/login").send(loginDto);
       const { token } = res.body as AccessToken;
@@ -62,7 +66,7 @@ describe("AuthController", () => {
     });
 
     it("should throw UnprocessableEntityError when user logs in with invalid password", async () => {
-      await createUser(loginDto);
+      await createUser(userDto);
 
       const res = await agent.post("/api/auth/login").send({ email: loginDto.email, password: "invalidPassword" });
 

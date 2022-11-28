@@ -38,10 +38,15 @@ describe("AuthService", () => {
 
   describe(".login", () => {
     const loginDto: LoginUserDto = { email: "user@test.com", password: "password" };
+    const userDto: CreateUserDto = {
+      ...loginDto,
+      address: "address",
+    }
+
     const createUser = async (userDto: CreateUserDto) => usersService.createUser(userDto);
 
     it("should create access token for existing user", async () => {
-      await createUser(loginDto);
+      await createUser(userDto);
 
       const { token } = await authService.login(loginDto);
 
@@ -56,7 +61,7 @@ describe("AuthService", () => {
     });
 
     it("should throw UnprocessableEntityError when user logs in with invalid password", async () => {
-      await createUser(loginDto);
+      await createUser(userDto);
 
       await authService.login({ email: loginDto.email, password: "invalidPassword" }).catch((error: UnprocessableEntityError) => {
         expect(error).toBeInstanceOf(UnprocessableEntityError);
