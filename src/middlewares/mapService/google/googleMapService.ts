@@ -1,6 +1,7 @@
-import { Coordinates, MapService } from "../MapService";
+import { CoordinatesArray, MapService } from "../MapService";
 import { Client } from "@googlemaps/google-maps-services-js";
 import config from "config/config";
+import { UnprocessableEntityError } from "errors/errors";
 
 export class GoogleMapService implements MapService {
   private readonly client: Client;
@@ -9,7 +10,7 @@ export class GoogleMapService implements MapService {
     this.client = new Client();
   }
 
-  public async geocode(address: string): Promise<Coordinates | null> {
+  public async geocode(address: string): Promise<CoordinatesArray> {
     const res = await this.client.geocode({
       params: {
         key: config.GOOGLE_MAPS_API_KEY,
@@ -20,18 +21,15 @@ export class GoogleMapService implements MapService {
     const results = res.data.results;
 
     if (!results) {
-      return null;
+      throw new UnprocessableEntityError("Cannot get location coordinates from the address");
     }
 
     const location = results[0].geometry.location;
 
-    return {
-      latitude: location.lat,
-      longitude: location.lng,
-    };
+    return [location.lat, location.lng];
   }
 
-  public async calculateDrivingDistance(origins: Coordinates[], destinations: Coordinates[]): Promise<number> {
+  public async calculateDrivingDistanceInMeters(origins: CoordinatesArray[], destinations: CoordinatesArray[]): Promise<number> {
     const distanceMatrixResponse = await this.client.distancematrix({
       params: {
         key: config.GOOGLE_MAPS_API_KEY,

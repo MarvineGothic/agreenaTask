@@ -25,13 +25,9 @@ export class UsersService {
 
     const hashedPassword = await this.hashPassword(password);
 
-    const coordinatesJson = await this.mapService.geocode(address);
+    const coordinatesArray = await this.mapService.geocode(address);
+    const coordinates = JSON.stringify(coordinatesArray);
 
-    if (!coordinatesJson) {
-      throw new UnprocessableEntityError("Cannot get location coordinates from the address");
-    }
-
-    const coordinates = `${coordinatesJson.latitude} ${coordinatesJson.longitude}`;
     const userData: DeepPartial<User> = { email, hashedPassword, address, coordinates };
 
     const newUser = this.usersRepository.create(userData);

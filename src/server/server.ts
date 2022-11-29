@@ -1,6 +1,6 @@
 import express, { Express } from "express";
 import { handleErrorMiddleware } from "middlewares/error-handler.middleware";
-import routes from "routes";
+import v1 from "routes/v1";
 
 export function setupServer(): Express {
   const app = express();
@@ -8,7 +8,7 @@ export function setupServer(): Express {
   app.use(express.json());
   app.use(express.urlencoded({ extended: true }));
 
-  app.use("/api", routes);
+  app.use("/api/v1", v1);
   app.use(handleErrorMiddleware);
 
   return app;
