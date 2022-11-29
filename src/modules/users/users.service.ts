@@ -5,13 +5,16 @@ import { DeepPartial, FindOptionsWhere, Repository } from "typeorm";
 import { CreateUserDto } from "./dto/create-user.dto";
 import { User } from "./entities/user.entity";
 import dataSource from "orm/orm.config";
-import { getCoordinatesFromAddress } from "helpers/utils";
+import { GoogleMapService } from "middlewares/mapService/google/googleMapService";
+import { MapService } from "middlewares/mapService/MapService";
 
 export class UsersService {
   private readonly usersRepository: Repository<User>;
+  private readonly mapService: MapService;
 
   constructor() {
     this.usersRepository = dataSource.getRepository(User);
+    this.mapService = new GoogleMapService();
   }
 
   public async createUser(data: CreateUserDto): Promise<User> {
@@ -22,12 +25,13 @@ export class UsersService {
 
     const hashedPassword = await this.hashPassword(password);
 
-    const coordinates: string = await getCoordinatesFromAddress(address);
+    const coordinatesJson = await this.mapService.geocode(address);
 
-    if (!coordinates) {
+    if (!coordinatesJson) {
       throw new UnprocessableEntityError("Cannot get location coordinates from the address");
     }
 
+    const coordinates = `${coordinatesJson.latitude} ${coordinatesJson.longitude}`;
     const userData: DeepPartial<User> = { email, hashedPassword, address, coordinates };
 
     const newUser = this.usersRepository.create(userData);

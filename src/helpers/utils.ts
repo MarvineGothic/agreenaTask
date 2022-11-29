@@ -6,7 +6,3 @@ export const disconnectAndClearDatabase = async (ds: DataSource): Promise<void> 
   await Promise.all(entityMetadatas.map(data => ds.query(`truncate table "${data.tableName}" cascade`)));
   await ds.destroy();
 };
-
-export const getCoordinatesFromAddress = async (address: string): Promise<string> => {
-  return Promise.resolve(address); // todo: implement logic
-}
