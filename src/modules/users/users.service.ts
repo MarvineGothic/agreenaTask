@@ -12,7 +12,7 @@ export class UsersService {
   private readonly usersRepository: Repository<User>;
   private readonly mapService: MapService;
 
-  constructor() {
+  constructor () {
     this.usersRepository = dataSource.getRepository(User);
     this.mapService = new GoogleMapService();
   }

@@ -3,7 +3,8 @@ import dataSource from "orm/orm.config";
 import { Repository } from "typeorm";
 import { User } from "modules/users/entities/user.entity";
 import { CoordinatesArray, MapService } from "middlewares/mapService/MapService";
-import { GoogleMapService } from "middlewares/mapService/google/googleMapService";
+// import { GoogleMapService } from "middlewares/mapService/google/googleMapService";
+import { DummyMapService } from "middlewares/mapService/dummy/DummyMapService";
 
 type FarmResponse = {
   name: string;
@@ -14,17 +15,24 @@ type FarmResponse = {
   drivingDistance: number;
 }
 
+type GetAllFarmsCommand = {
+  user: User,
+  sort: string,
+  filter: string,
+}
+
 export class FarmService {
   private readonly farmsRepository: Repository<Farm>;
   private readonly mapService: MapService;
 
   constructor () {
     this.farmsRepository = dataSource.getRepository(Farm);
-    this.mapService = new GoogleMapService();
+    this.mapService = new DummyMapService();
   }
 
-  public async getAllFarms(user: User): Promise<FarmResponse[]> {
-    const userCoordinates = JSON.parse(user.coordinates) as CoordinatesArray;
+  public async getAllFarms(command: GetAllFarmsCommand): Promise<FarmResponse[]> {
+    const userCoordinates = JSON.parse(command.user.coordinates) as CoordinatesArray;
+    console.log(command)
 
     const allFarms = await this.farmsRepository.find({
       relations: { owner: true }
