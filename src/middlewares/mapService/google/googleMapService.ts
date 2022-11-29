@@ -1,7 +1,7 @@
 import { CoordinatesArray, MapService } from "../MapService";
 import { Client } from "@googlemaps/google-maps-services-js";
 import config from "config/config";
-import { UnprocessableEntityError } from "errors/errors";
+import { MapServiceError } from "errors/errors";
 
 export class GoogleMapService implements MapService {
   private readonly client: Client;
@@ -21,7 +21,7 @@ export class GoogleMapService implements MapService {
     const results = res.data.results;
 
     if (!results) {
-      throw new UnprocessableEntityError("Cannot get location coordinates from the address");
+      throw new MapServiceError("Cannot get location coordinates from the address");
     }
 
     const location = results[0].geometry.location;
