@@ -1,6 +1,6 @@
-export type CoordinatesArray = [ number, number ];
+export type LatLngString = string;
 
 export interface MapService {
-  geocode(address: string): Promise<CoordinatesArray>;
-  calculateDrivingDistanceInMeters(origins: CoordinatesArray[], destinations: CoordinatesArray[]): Promise<number>;
+  geocode(address: string): Promise<LatLngString>;
+  calculateDrivingDistanceInMeters(command: {origins: LatLngString[], destinations: LatLngString[]}): Promise<number>;
 }

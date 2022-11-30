@@ -1,4 +1,4 @@
-import { CoordinatesArray, MapService } from "../MapService";
+import { LatLngString, MapService } from "../MapService";
 import { Client } from "@googlemaps/google-maps-services-js";
 import config from "config/config";
 import { MapServiceError } from "errors/errors";
@@ -10,7 +10,7 @@ export class GoogleMapService implements MapService {
     this.client = new Client();
   }
 
-  public async geocode(address: string): Promise<CoordinatesArray> {
+  public async geocode(address: string): Promise<LatLngString> {
     const res = await this.client.geocode({
       params: {
         key: config.GOOGLE_MAPS_API_KEY,
@@ -26,15 +26,17 @@ export class GoogleMapService implements MapService {
 
     const location = results[0].geometry.location;
 
-    return [location.lat, location.lng];
+    return `${location.lat},${location.lng}`;
   }
 
-  public async calculateDrivingDistanceInMeters(origins: CoordinatesArray[], destinations: CoordinatesArray[]): Promise<number> {
+  public async calculateDrivingDistanceInMeters(command: {
+    origins: LatLngString[], destinations: LatLngString[],
+  }): Promise<number> {
     const distanceMatrixResponse = await this.client.distancematrix({
       params: {
         key: config.GOOGLE_MAPS_API_KEY,
-        origins,
-        destinations,
+        origins: command.origins,
+        destinations: command.destinations,
       }
     });
 

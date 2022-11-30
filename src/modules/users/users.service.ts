@@ -5,7 +5,7 @@ import { DeepPartial, FindOptionsWhere, Repository } from "typeorm";
 import { CreateUserDto } from "./dto/create-user.dto";
 import { User } from "./entities/user.entity";
 import dataSource from "orm/orm.config";
-import { GoogleMapService } from "middlewares/mapService/google/googleMapService";
+import { GoogleMapService } from "middlewares/mapService/google/GoogleMapService";
 import { MapService } from "middlewares/mapService/MapService";
 
 export class UsersService {
@@ -25,8 +25,7 @@ export class UsersService {
 
     const hashedPassword = await this.hashPassword(password);
 
-    const coordinatesArray = await this.mapService.geocode(address);
-    const coordinates = JSON.stringify(coordinatesArray);
+    const coordinates = await this.mapService.geocode(address);
 
     const userData: DeepPartial<User> = { email, hashedPassword, address, coordinates };
 

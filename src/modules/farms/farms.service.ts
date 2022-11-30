@@ -2,8 +2,7 @@ import { Farm } from "./entities/farm.entity";
 import dataSource from "orm/orm.config";
 import { Repository } from "typeorm";
 import { User } from "modules/users/entities/user.entity";
-import { CoordinatesArray, MapService } from "middlewares/mapService/MapService";
-// import { GoogleMapService } from "middlewares/mapService/google/googleMapService";
+import { MapService } from "middlewares/mapService/MapService";
 import { DummyMapService } from "middlewares/mapService/dummy/DummyMapService";
 
 type FarmResponse = {
@@ -15,10 +14,13 @@ type FarmResponse = {
   drivingDistance: number;
 }
 
-type GetAllFarmsCommand = {
+type SortAndFilterCommand = {
+  sort: string;
+  filter: string;
+}
+
+type GetAllFarmsCommand = SortAndFilterCommand & {
   user: User,
-  sort: string,
-  filter: string,
 }
 
 export class FarmService {
@@ -31,19 +33,22 @@ export class FarmService {
   }
 
   public async getAllFarms(command: GetAllFarmsCommand): Promise<FarmResponse[]> {
-    const userCoordinates = JSON.parse(command.user.coordinates) as CoordinatesArray;
-    console.log(command)
+    const userCoordinates = command.user.coordinates;
 
-    const allFarms = await this.farmsRepository.find({
-      relations: { owner: true }
+    const allFarms = await this.findAllWithSortAndFilter({
+      sort: command.sort,
+      filter: command.filter,
     });
 
     const result = [];
 
     for (const farm of allFarms) {
-      const farmCoordinates = JSON.parse(farm.coordinates) as CoordinatesArray;
+      const farmCoordinates = farm.coordinates;
 
-      const drivingDistance = await this.mapService.calculateDrivingDistanceInMeters([userCoordinates], [farmCoordinates]);
+      const drivingDistance = await this.mapService.calculateDrivingDistanceInMeters({
+        origins: [userCoordinates],
+        destinations: [farmCoordinates]
+      });
 
       result.push({
         name: farm.name,
@@ -56,5 +61,12 @@ export class FarmService {
     }
 
     return result;
+  }
+
+  public async findAllWithSortAndFilter(command: SortAndFilterCommand): Promise<Farm[]> {
+    console.log(command)
+    return this.farmsRepository.find({
+      relations: { owner: true }
+    });
   }
 }
