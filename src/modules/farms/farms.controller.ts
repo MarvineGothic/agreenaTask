@@ -1,11 +1,12 @@
 import { NextFunction, Request, Response } from "express";
+import { DummyMapService } from "middlewares/mapService/dummy/DummyMapService";
 import { FarmService } from "./farms.service";
 
 export class FarmController {
   private readonly farmService: FarmService;
 
   constructor () {
-    this.farmService = new FarmService();
+    this.farmService = new FarmService(new DummyMapService());
   }
 
   public async getAll(req: Request, res: Response, next: NextFunction) {

@@ -48,7 +48,7 @@ describe("AuthController", () => {
     it("should login existing user", async () => {
       await createUser(userDto);
 
-      const res = await agent.post("/api/auth/login").send(loginDto);
+      const res = await agent.post("/api/v1/auth/login").send(loginDto);
       const { token } = res.body as AccessToken;
 
       expect(res.statusCode).toBe(201);
@@ -56,7 +56,7 @@ describe("AuthController", () => {
     });
 
     it("should throw UnprocessableEntityError when user logs in with invalid email", async () => {
-      const res = await agent.post("/api/auth/login").send({ email: "invalidEmail", password: "pwd" });
+      const res = await agent.post("/api/v1/auth/login").send({ email: "invalidEmail", password: "pwd" });
 
       expect(res.statusCode).toBe(422);
       expect(res.body).toMatchObject({
@@ -68,7 +68,7 @@ describe("AuthController", () => {
     it("should throw UnprocessableEntityError when user logs in with invalid password", async () => {
       await createUser(userDto);
 
-      const res = await agent.post("/api/auth/login").send({ email: loginDto.email, password: "invalidPassword" });
+      const res = await agent.post("/api/v1/auth/login").send({ email: loginDto.email, password: "invalidPassword" });
 
       expect(res.statusCode).toBe(422);
       expect(res.body).toMatchObject({
