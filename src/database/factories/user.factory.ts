@@ -6,7 +6,7 @@ export default setSeederFactory(User, async (faker) => {
   const user = new User();
 
   user.email = faker.internet.email();
-  user.hashedPassword = await hashPassword(faker.internet.password());
+  user.hashedPassword = await hashPassword("password");
   user.address = `${faker.address.streetAddress()} ${faker.address.city()} ${faker.address.country()}`;
   user.coordinates = `${fakeLatitude()},${fakeLongitude()}`;
 

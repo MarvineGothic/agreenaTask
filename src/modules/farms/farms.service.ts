@@ -13,12 +13,12 @@ type FarmResponse = {
   drivingDistance: number;
 }
 
-type SortAndFilterCommand = {
+type SortCommand = {
   sort: string;
   filter: string;
 }
 
-type GetAllFarmsCommand = SortAndFilterCommand & {
+type GetAllFarmsCommand = SortCommand & {
   user: User,
 }
 
@@ -32,12 +32,14 @@ export class FarmService {
   public async getAllFarms(command: GetAllFarmsCommand): Promise<FarmResponse[]> {
     const userCoordinates = command.user.coordinates;
 
-    const allFarms = await this.findAllWithSortAndFilter({
+    const allFarms = await this.findAllWithSort({
       sort: command.sort,
       filter: command.filter,
     });
 
-    const result = [];
+    let farmsResult = []
+    const farms = [];
+    let totalYield = 0;
 
     for (const farm of allFarms) {
       const farmCoordinates = farm.coordinates;
@@ -47,7 +49,7 @@ export class FarmService {
         destinations: [farmCoordinates]
       });
 
-      result.push({
+      farms.push({
         name: farm.name,
         address: farm.address,
         owner: farm.owner.email,
@@ -55,15 +57,54 @@ export class FarmService {
         yield: farm.yield,
         drivingDistance,
       })
+
+      if (command.filter === "outliers") {
+        totalYield += Number(farm.yield);
+        console.log(totalYield)
+      }
     }
 
-    return result;
+    farmsResult = farms;
+
+    if (command.filter === "outliers") {
+      const averageYield = totalYield / farms.length;
+
+      farmsResult = farms.filter((farm) => {
+        const perCent = Math.abs(farm.yield - averageYield) * 100 / averageYield;
+        console.log(perCent, averageYield)
+        if (perCent < 30) {
+          return farm;
+        }
+      });
+    }
+
+    if (command.sort === "driving_distance") {
+      farmsResult = farms.sort((farmA, farmB) => farmA.drivingDistance - farmB.drivingDistance)
+    }
+
+    return farmsResult;
   }
 
-  public async findAllWithSortAndFilter(command: SortAndFilterCommand): Promise<Farm[]> {
-    console.log(command)
+  public async findAllWithSort(command: SortCommand): Promise<Farm[]> {
+    let sortConfig = {};
+
+    if (command.sort === "name") {
+      sortConfig = {
+        order: {
+          name: "ASC"
+        }
+      }
+    } else if (command.sort === "date") {
+      sortConfig = {
+        order: {
+          createdAt: "DESC"
+        }
+      }
+    }
+
     return this.farmsRepository.find({
-      relations: { owner: true }
+      relations: { owner: true },
+      ...sortConfig,
     });
   }
 }
