@@ -49,6 +49,8 @@ describe("UsersController", () => {
       expect(res.body).toMatchObject({
         id: expect.any(String),
         email: expect.stringContaining(createUserDto.email) as string,
+        address: "address",
+        coordinates: expect.any(String),
         createdAt: expect.any(String),
         updatedAt: expect.any(String),
       });
