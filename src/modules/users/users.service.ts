@@ -5,7 +5,7 @@ import { User } from "./entities/user.entity";
 import dataSource from "orm/orm.config";
 import { MapService } from "middlewares/mapService/MapService";
 import { hashPassword } from "helpers/utils";
-import { DummyMapService } from "middlewares/mapService/dummy/DummyMapService";
+import { MapServiceProvider } from "middlewares/mapService/MapServiceProvider";
 
 export class UsersService {
   private readonly usersRepository: Repository<User>;
@@ -13,7 +13,7 @@ export class UsersService {
 
   constructor () {
     this.usersRepository = dataSource.getRepository(User);
-    this.mapService = new DummyMapService();
+    this.mapService = MapServiceProvider.getService();
   }
 
   public async createUser(data: CreateUserDto): Promise<User> {

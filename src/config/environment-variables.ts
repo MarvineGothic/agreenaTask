@@ -47,5 +47,9 @@ export class EnvironmentVariables {
 
   @IsString()
   @IsNotEmpty()
+  public MAP_SERVICE_PROVIDER: string;
+  
+  @IsString()
+  @IsNotEmpty()
   public GOOGLE_MAPS_API_KEY: string;
 }

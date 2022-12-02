@@ -3,6 +3,7 @@ import dataSource from "orm/orm.config";
 import { Repository } from "typeorm";
 import { User } from "modules/users/entities/user.entity";
 import { MapService } from "middlewares/mapService/MapService";
+import { MapServiceProvider } from "middlewares/mapService/MapServiceProvider";
 
 type FarmResponse = {
   name: string;
@@ -24,9 +25,11 @@ type GetAllFarmsCommand = SortCommand & {
 
 export class FarmService {
   private readonly farmsRepository: Repository<Farm>;
+  private readonly mapService: MapService;
 
-  constructor (private readonly mapService: MapService) {
+  constructor () {
     this.farmsRepository = dataSource.getRepository(Farm);
+    this.mapService = MapServiceProvider.getService();
   }
 
   public async getAllFarms(command: GetAllFarmsCommand): Promise<FarmResponse[]> {
