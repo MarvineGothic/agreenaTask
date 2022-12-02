@@ -23,7 +23,7 @@ type GetAllFarmsCommand = SortCommand & {
   user: User,
 }
 
-export class FarmService {
+export class FarmsService {
   private readonly farmsRepository: Repository<Farm>;
   private readonly mapService: MapService;
 
@@ -52,18 +52,20 @@ export class FarmService {
         destinations: [farmCoordinates]
       });
 
+      const size = Number(farm.size);
+      const farmYield = Number(farm.yield);
+
       farms.push({
         name: farm.name,
         address: farm.address,
         owner: farm.owner.email,
-        size: farm.size,
-        yield: farm.yield,
+        size,
+        yield: farmYield,
         drivingDistance,
       })
 
       if (command.filter === "outliers") {
-        totalYield += Number(farm.yield);
-        console.log(totalYield)
+        totalYield += farmYield;
       }
     }
 
@@ -74,7 +76,7 @@ export class FarmService {
 
       farmsResult = farms.filter((farm) => {
         const perCent = Math.abs(farm.yield - averageYield) * 100 / averageYield;
-        console.log(perCent, averageYield)
+
         if (perCent < 30) {
           return farm;
         }

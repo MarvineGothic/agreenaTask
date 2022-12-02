@@ -3,6 +3,7 @@
 /* eslint-disable no-unused-vars */
 import { LatLngString, MapService } from "../MapService";
 import { fakeLatitude, fakeLongitude } from "helpers/utils";
+import { faker } from "@faker-js/faker";
 
 export class DummyMapService implements MapService {
   public async geocode(_address: string): Promise<LatLngString> {
@@ -13,6 +14,6 @@ export class DummyMapService implements MapService {
     origins: LatLngString[],
     destinations: LatLngString[],
   }): Promise<number> {
-    return Promise.resolve(0);
+    return Promise.resolve(faker.datatype.number());
   }
 }

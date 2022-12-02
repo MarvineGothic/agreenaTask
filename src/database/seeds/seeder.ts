@@ -9,10 +9,10 @@ export default class UserFarmSeeder implements Seeder {
   public async run(dataSource: DataSource, factoryManager: SeederFactoryManager): Promise<any> {
     const userFactory = factoryManager.get(User);
 
-    const repository = dataSource.getRepository(Farm);
+    const farmsRepository = dataSource.getRepository(Farm);
 
     for (let i = 0; i < 4; i++) {
-      await repository.insert({
+      await farmsRepository.insert({
         address: `${faker.address.streetAddress()} ${faker.address.city()} ${faker.address.country()}`,
         coordinates: `${fakeLatitude()},${fakeLongitude()}`,
         name: faker.word.noun(),

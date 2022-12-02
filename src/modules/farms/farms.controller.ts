@@ -1,11 +1,11 @@
 import { NextFunction, Request, Response } from "express";
-import { FarmService } from "./farms.service";
+import { FarmsService } from "./farms.service";
 
 export class FarmController {
-  private readonly farmService: FarmService;
+  private readonly farmService: FarmsService;
 
   constructor () {
-    this.farmService = new FarmService();
+    this.farmService = new FarmsService();
   }
 
   public async getAll(req: Request, res: Response, next: NextFunction) {
