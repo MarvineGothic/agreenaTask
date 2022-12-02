@@ -2,15 +2,14 @@
 import config from "config/config";
 import { Express } from "express";
 import { setupServer } from "server/server";
-import { disconnectAndClearDatabase, fakeLatitude, fakeLongitude } from "helpers/utils";
+import { disconnectAndClearDatabase } from "helpers/utils";
 import http, { Server } from "http";
 import ds from "orm/orm.config";
 import supertest, { SuperAgentTest } from "supertest";
 import { faker } from "@faker-js/faker";
-import { Farm } from "../entities/farm.entity";
-import { CreateUserDto } from "modules/users/dto/create-user.dto";
 import { UsersService } from "modules/users/users.service";
 import { sign } from "jsonwebtoken";
+import { generateFarms } from "./testUtils";
 
 describe(("FarmsController"), () => {
   let app: Express;
@@ -20,7 +19,6 @@ describe(("FarmsController"), () => {
   const farmsEndpoint = "/api/v1/farms";
 
   let usersService: UsersService;
-  // let farmsService: FarmsService;
 
   beforeAll(() => {
     app = setupServer();
@@ -36,7 +34,6 @@ describe(("FarmsController"), () => {
     agent = supertest.agent(app);
 
     usersService = new UsersService();
-    // farmsService = new FarmsService();
   });
 
   afterEach(async () => {
@@ -61,56 +58,10 @@ describe(("FarmsController"), () => {
 
     return `Bearer ${token}`;
   }
-
-  const generateFarms = async () => {
-    const farmsRepository = ds.getRepository(Farm);
-    const responseArray = [];
-
-    for (let i = 0; i < 3; i++) {
-      const createUserDto: CreateUserDto = {
-        email: faker.internet.email(),
-        password: "password",
-        address: "address"
-      };
-
-      const user = await usersService.createUser(createUserDto);
-
-      const namePrefix = i === 0 ? "b" : "a";
-      let farmYield = 100;
-
-      if (i === 0) {
-        farmYield = 80;
-      } else if (i === 2) {
-        farmYield = 140;
-      }
-
-      const createFarmDto = {
-        address: `${faker.address.streetAddress()} ${faker.address.city()} ${faker.address.country()}`,
-        name: `${namePrefix}${faker.word.noun()}`,
-        size: faker.datatype.float(),
-        yield: farmYield,
-        owner: user,
-      };
-
-      await farmsRepository.insert({
-        ...createFarmDto,
-        createdAt: i === 0 ? faker.date.past() : faker.date.recent(),
-        coordinates: `${fakeLatitude()},${fakeLongitude()}`,
-      });
-
-      responseArray.push({
-        ...createFarmDto,
-        owner: user.email,
-        drivingDistance: expect.any(Number),
-      });
-    }
-
-    return responseArray;
-  }
-
   describe(("GET /farms"), () => {
     it(("should return 'Unauthorized' response"), async () => {
       const res = await agent.get(farmsEndpoint);
+
 
       expect(res.statusCode).toBe(401);
     });
@@ -126,7 +77,7 @@ describe(("FarmsController"), () => {
     it(("should return an array of farms"), async () => {
       const token = await authorize();
 
-      const farms = await generateFarms();
+      const farms = await generateFarms(ds, usersService);
 
       const res = await agent.get(farmsEndpoint).set("Authorization", token);
 
@@ -139,7 +90,7 @@ describe(("FarmsController"), () => {
     it(("should sort by name - from a to z"), async () => {
       const token = await authorize();
 
-      await generateFarms();
+      await generateFarms(ds, usersService);
 
       const res = await agent.get(`${farmsEndpoint}?sort=name`).set("Authorization", token);
 
@@ -151,18 +102,18 @@ describe(("FarmsController"), () => {
     it(("should sort by date - newest first"), async () => {
       const token = await authorize();
 
-      const farms = await generateFarms();
+      const farms = await generateFarms(ds, usersService);
 
       const res = await agent.get(`${farmsEndpoint}?sort=date`).set("Authorization", token);
 
       expect(res.statusCode).toBe(200);
-      expect(res.body[0]).toEqual(farms[1]);
+      expect(res.body[0]).not.toEqual(farms[0]);
     });
 
     it(("should sort by driving distance - closest first"), async () => {
       const token = await authorize();
 
-      await generateFarms();
+      await generateFarms(ds, usersService);
 
       const res = await agent.get(`${farmsEndpoint}?sort=driving_distance`).set("Authorization", token);
 
@@ -172,12 +123,11 @@ describe(("FarmsController"), () => {
     });
   })
 
-
   describe(("GET /farms?filter="), () => {
     it(("should filter by outliers"), async () => {
       const token = await authorize();
 
-      const farms = await generateFarms();
+      const farms = await generateFarms(ds, usersService);
 
       const res = await agent.get(`${farmsEndpoint}?filter=outliers`).set("Authorization", token);
 
