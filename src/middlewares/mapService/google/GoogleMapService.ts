@@ -20,7 +20,7 @@ export class GoogleMapService implements MapService {
 
     const results = res.data.results;
 
-    if (!results) {
+    if (res.data.status !== "OK" || !results) {
       throw new MapServiceError("Cannot get location coordinates from the address");
     }
 
@@ -49,5 +49,9 @@ export class GoogleMapService implements MapService {
     }
 
     return distance;
+  }
+
+  public getClient(): Client {
+    return this.client;
   }
 }

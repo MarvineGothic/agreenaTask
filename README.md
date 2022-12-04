@@ -1,5 +1,10 @@
 # recruitment-node-private
 
+## Setup .env
+ - copy .env.test to .env
+ - change `MAP_SERVICE_PROVIDER` to `google`
+ - change `GOOGLE_MAPS_API_KEY` to your personal api key
+ 
 ## Installation
 
 - Install [NodeJS](https://nodejs.org/en/) lts or latest version
